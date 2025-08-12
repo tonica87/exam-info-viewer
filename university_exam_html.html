@@ -1,0 +1,1912 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>大学入試情報システム</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background-color: #f9fafb;
+            color: #374151;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        /* ヘッダー */
+        .header {
+            color: white;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        .header.red { background-color: #1f2937; }
+        .header.blue { background-color: #1e3a8a; }
+        .header.indigo { background-color: #3730a3; }
+        .header.green { background-color: #166534; }
+        .header.purple { background-color: #6b21a8; }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1rem;
+            padding: 1.5rem 0;
+        }
+
+        .header-info {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .header-title {
+            font-size: 1.875rem;
+            font-weight: bold;
+        }
+
+        .header-subtitle {
+            color: #d1d5db;
+            margin-top: 0.25rem;
+        }
+
+        .header-meta {
+            display: flex;
+            gap: 1rem;
+            font-size: 0.875rem;
+            color: #d1d5db;
+            margin-top: 0.25rem;
+        }
+
+        .university-buttons {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .university-btn {
+            padding: 0.5rem 0.75rem;
+            border-radius: 0.375rem;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+            border: none;
+            cursor: pointer;
+            transform: scale(1);
+        }
+
+        .university-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .university-btn.active {
+            background-color: white;
+            color: #374151;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .university-btn.inactive {
+            background-color: #4b5563;
+            color: white;
+        }
+
+        .university-btn.inactive:hover {
+            background-color: #6b7280;
+        }
+
+        /* 統計パネル */
+        .stats-panel {
+            background: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            margin: 2rem 0 1.5rem;
+            overflow: hidden;
+        }
+
+        .stats-toggle {
+            width: 100%;
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: white;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .stats-toggle:hover {
+            background-color: #f9fafb;
+        }
+
+        .stats-title {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.125rem;
+            font-weight: 600;
+        }
+
+        .stats-content {
+            padding: 0 1.5rem 1.5rem;
+            display: none;
+        }
+
+        .stats-content.show {
+            display: block;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+        }
+
+        .stat-card {
+            padding: 1rem;
+            border-radius: 0.5rem;
+        }
+
+        .stat-card.blue { background-color: #dbeafe; }
+        .stat-card.green { background-color: #dcfce7; }
+        .stat-card.orange { background-color: #fed7aa; }
+        .stat-card.purple { background-color: #e9d5ff; }
+
+        .stat-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .stat-value.blue { color: #1e40af; }
+        .stat-value.green { color: #166534; }
+        .stat-value.orange { color: #c2410c; }
+        .stat-value.purple { color: #7c3aed; }
+
+        /* 検索・フィルターセクション */
+        .search-section {
+            background: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .search-form {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            align-items: end;
+        }
+
+        .form-group {
+            flex: 1;
+            min-width: 250px;
+        }
+
+        .form-group.small {
+            min-width: 200px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #374151;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.5rem 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.375rem;
+            font-size: 1rem;
+            transition: all 0.2s;
+        }
+
+        .form-input:focus {
+            outline: none;
+            ring: 2px solid #3b82f6;
+            border-color: transparent;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            border: none;
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-purple { background-color: #7c3aed; color: white; }
+        .btn-purple:hover { background-color: #6d28d9; }
+        .btn-red { background-color: #dc2626; color: white; }
+        .btn-red:hover { background-color: #b91c1c; }
+        .btn-gray { background-color: #6b7280; color: white; }
+        .btn-gray:hover { background-color: #4b5563; }
+        .btn-blue { background-color: #2563eb; color: white; }
+        .btn-blue:hover { background-color: #1d4ed8; }
+
+        .search-meta {
+            margin-top: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+
+        /* 結果表示 */
+        .results {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .faculty-card {
+            background: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            transition: all 0.2s;
+        }
+
+        .faculty-card:hover {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .faculty-header {
+            color: white;
+            padding: 1.5rem;
+            cursor: pointer;
+        }
+
+        .faculty-header.red { background-color: #b91c1c; }
+        .faculty-header.blue { background-color: #1d4ed8; }
+        .faculty-header.indigo { background-color: #4338ca; }
+        .faculty-header.green { background-color: #059669; }
+        .faculty-header.purple { background-color: #7c3aed; }
+        .faculty-header.gray { background-color: #4b5563; }
+
+        .faculty-header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .faculty-title {
+            font-size: 1.25rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .faculty-subtitle {
+            color: #d1d5db;
+            margin-top: 0.25rem;
+        }
+
+        .faculty-content {
+            padding: 1.5rem;
+            display: none;
+        }
+
+        .faculty-content.show {
+            display: block;
+        }
+
+        .exam-types {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .exam-card {
+            border: 1px solid #e5e7eb;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            position: relative;
+            transition: border-color 0.2s;
+        }
+
+        .exam-card:hover {
+            border-color: #d1d5db;
+        }
+
+        .favorite-btn {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            padding: 0.5rem;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: transparent;
+        }
+
+        .favorite-btn:hover {
+            background-color: #fef3c7;
+            transform: scale(1.1);
+        }
+
+        .favorite-btn.active {
+            color: #f59e0b;
+            background-color: #fef3c7;
+            transform: scale(1.1);
+        }
+
+        .exam-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 1rem;
+            padding-right: 3rem;
+        }
+
+        .exam-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #374151;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .exam-badges {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .badge {
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .badge.red { background-color: #fecaca; color: #991b1b; }
+        .badge.orange { background-color: #fed7aa; color: #c2410c; }
+        .badge.yellow { background-color: #fef3c7; color: #d97706; }
+        .badge.green { background-color: #dcfce7; color: #166534; }
+        .badge.blue { background-color: #dbeafe; color: #1e40af; }
+
+        .exam-points {
+            text-align: right;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .exam-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .detail-section {
+            margin-bottom: 1rem;
+        }
+
+        .detail-title {
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .detail-indicator {
+            width: 0.5rem;
+            height: 0.5rem;
+            border-radius: 50%;
+            margin-right: 0.5rem;
+        }
+
+        .detail-indicator.blue { background-color: #3b82f6; }
+        .detail-indicator.green { background-color: #10b981; }
+        .detail-indicator.orange { background-color: #f97316; }
+
+        .detail-content {
+            padding: 0.75rem;
+            border-radius: 0.375rem;
+            border-left: 4px solid;
+        }
+
+        .detail-content.blue {
+            background-color: #eff6ff;
+            border-color: #3b82f6;
+        }
+
+        .detail-content.green {
+            background-color: #f0fdf4;
+            border-color: #10b981;
+        }
+
+        .detail-content.orange {
+            background-color: #fff7ed;
+            border-color: #f97316;
+        }
+
+        .subject-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.25rem;
+            margin-top: 0.5rem;
+        }
+
+        .subject-tag {
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+        }
+
+        .subject-tag.blue {
+            background-color: #dbeafe;
+            color: #1e40af;
+        }
+
+        .subject-tag.green {
+            background-color: #dcfce7;
+            color: #166534;
+        }
+
+        /* モーダル */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 1rem;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 0.5rem;
+            max-width: 500px;
+            width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .modal-title {
+            font-size: 1.25rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #6b7280;
+        }
+
+        .modal-close:hover {
+            color: #374151;
+        }
+
+        /* アラート */
+        .alert {
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: start;
+            gap: 0.75rem;
+        }
+
+        .alert.success {
+            background-color: #f0fdf4;
+            color: #166534;
+            border: 1px solid #bbf7d0;
+        }
+
+        .alert.error {
+            background-color: #fef2f2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }
+
+        .upload-zone {
+            border: 2px dashed #d1d5db;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            text-align: center;
+            transition: border-color 0.2s;
+            cursor: pointer;
+        }
+
+        .upload-zone:hover {
+            border-color: #9ca3af;
+        }
+
+        .format-example {
+            background-color: #f9fafb;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .format-code {
+            background: white;
+            padding: 0.5rem;
+            border-radius: 0.25rem;
+            border: 1px solid #e5e7eb;
+            font-size: 0.75rem;
+            overflow-x: auto;
+            max-height: 8rem;
+            overflow-y: auto;
+        }
+
+        .university-list {
+            max-height: 15rem;
+            overflow-y: auto;
+        }
+
+        .university-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.75rem;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.5rem;
+            margin-bottom: 0.5rem;
+            transition: background-color 0.2s;
+        }
+
+        .university-item:hover {
+            background-color: #f9fafb;
+        }
+
+        .university-info {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .university-meta {
+            font-size: 0.75rem;
+            color: #6b7280;
+        }
+
+        .btn:disabled {
+            background-color: #f3f4f6;
+            color: #9ca3af;
+            cursor: not-allowed;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 3rem;
+            color: #6b7280;
+        }
+
+        .footer {
+            margin-top: 3rem;
+            background: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            padding: 1.5rem;
+            text-align: center;
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+
+        /* レスポンシブ */
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .search-form {
+                flex-direction: column;
+            }
+
+            .action-buttons {
+                justify-content: center;
+            }
+
+            .exam-details {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+    <!-- ヘッダー -->
+    <header class="header" id="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="header-info">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="10" r="1"></circle>
+                        <path d="M12 2a8 8 0 0 0-8 8c0 1 0 3 3 6l5 5 5-5c3-3 3-5 3-6a8 8 0 0 0-8-8Z"></path>
+                        <path d="M9.5 3h5"></path>
+                        <path d="M9.5 6h5"></path>
+                        <path d="M9.5 9h5"></path>
+                    </svg>
+                    <div>
+                        <h1 class="header-title" id="universityName">早稲田大学</h1>
+                        <p class="header-subtitle">入試科目・配点一覧表 2025年度</p>
+                        <div class="header-meta">
+                            <span>創立: <span id="established">1882</span>年</span>
+                            <span>所在地: <span id="location">東京都新宿区</span></span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="university-buttons" id="universityButtons">
+                    <!-- 動的に生成 -->
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- 統計情報パネル -->
+        <div class="stats-panel">
+            <button class="stats-toggle" onclick="toggleStats()">
+                <div class="stats-title">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="23,6 13.5,15.5 8.5,10.5 1,18"></polyline>
+                        <polyline points="17,6 23,6 23,12"></polyline>
+                    </svg>
+                    統計情報
+                </div>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="statsChevron">
+                    <polyline points="6,9 12,15 18,9"></polyline>
+                </svg>
+            </button>
+            
+            <div class="stats-content" id="statsContent">
+                <div class="stats-grid">
+                    <div class="stat-card blue">
+                        <div class="stat-header">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                            </svg>
+                            <span>学部数</span>
+                        </div>
+                        <div class="stat-value blue" id="totalFaculties">0</div>
+                    </div>
+                    
+                    <div class="stat-card green">
+                        <div class="stat-header">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                                <line x1="8" y1="21" x2="16" y2="21"></line>
+                                <line x1="12" y1="17" x2="12" y2="21"></line>
+                            </svg>
+                            <span>入試方式数</span>
+                        </div>
+                        <div class="stat-value green" id="totalExamTypes">0</div>
+                    </div>
+                    
+                    <div class="stat-card orange">
+                        <div class="stat-header">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#c2410c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="9" cy="7" r="4"></circle>
+                                <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                            </svg>
+                            <span>平均競争率</span>
+                        </div>
+                        <div class="stat-value orange"><span id="avgCompetition">0</span>倍</div>
+                    </div>
+                    
+                    <div class="stat-card purple">
+                        <div class="stat-header">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="8" r="7"></circle>
+                                <polyline points="8.21,13.89 7,23 12,20 17,23 15.79,13.88"></polyline>
+                            </svg>
+                            <span>難易度分布</span>
+                        </div>
+                        <div id="difficultyDistribution">
+                            <!-- 動的に生成 -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 検索・フィルターセクション -->
+        <div class="search-section">
+            <div class="search-form">
+                <div class="form-group">
+                    <label class="form-label">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: inline; vertical-align: middle; margin-right: 4px;">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <path d="m21 21-4.35-4.35"></path>
+                        </svg>
+                        キーワード検索
+                    </label>
+                    <input type="text" class="form-input" id="searchTerm" placeholder="学部名、入試方式、備考で検索...">
+                </div>
+
+                <div class="form-group small">
+                    <label class="form-label">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: inline; vertical-align: middle; margin-right: 4px;">
+                            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                        </svg>
+                        学部
+                    </label>
+                    <select class="form-input" id="facultyFilter">
+                        <option value="">すべての学部</option>
+                    </select>
+                </div>
+
+                <div class="form-group small">
+                    <label class="form-label">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: inline; vertical-align: middle; margin-right: 4px;">
+                            <polygon points="22,3 2,3 10,12.46 10,19 14,21 14,12.46"></polygon>
+                        </svg>
+                        入試方式
+                    </label>
+                    <select class="form-input" id="examTypeFilter">
+                        <option value="">すべての方式</option>
+                    </select>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="btn btn-purple" onclick="showUploadModal()">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="7,10 12,15 17,10"></polyline>
+                            <line x1="12" y1="15" x2="12" y2="3"></line>
+                        </svg>
+                        データ追加
+                    </button>
+                    <button class="btn btn-red" onclick="showDeleteModal()">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                        データ削除
+                    </button>
+                    <button class="btn btn-gray" onclick="resetFilters()">
+                        リセット
+                    </button>
+                    <button class="btn btn-blue" onclick="shareData()">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="18" cy="5" r="3"></circle>
+                            <circle cx="6" cy="12" r="3"></circle>
+                            <circle cx="18" cy="19" r="3"></circle>
+                            <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+                            <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+                        </svg>
+                        共有
+                    </button>
+                </div>
+            </div>
+
+            <div class="search-meta">
+                <div>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: inline; vertical-align: middle; margin-right: 4px;">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="9" cy="7" r="4"></circle>
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                    </svg>
+                    <span id="resultCount">0</span>件の学部が見つかりました
+                </div>
+                <div>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: inline; vertical-align: middle; margin-right: 4px;">
+                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                    </svg>
+                    お気に入り: <span id="favoriteCount">0</span>件
+                </div>
+            </div>
+        </div>
+
+        <!-- 結果表示 -->
+        <div class="results" id="results">
+            <!-- 動的に生成 -->
+        </div>
+
+        <!-- 結果なしメッセージ -->
+        <div class="no-results hidden" id="noResults">
+            <div style="font-size: 1.125rem; margin-bottom: 1rem;">
+                検索条件に合致する学部が見つかりませんでした。
+            </div>
+            <button class="btn btn-blue" onclick="resetFilters()">
+                フィルターをリセットする
+            </button>
+        </div>
+
+        <!-- フッター -->
+        <footer class="footer">
+            <p style="margin-bottom: 0.5rem;">※入試情報は原則、入試ガイド等による10月上旬までの判明分により作成。</p>
+            <p style="margin-bottom: 0.5rem;">出願に際しては、必ず大学の「募集要項」で最終確認要。</p>
+            <p style="font-size: 0.75rem; color: #9ca3af;">
+                データ更新日: <span id="updateDate"></span> | 
+                対応大学数: <span id="universityCount">0</span>校 | 
+                JSONファイルアップロード対応 | データ削除機能
+            </p>
+        </footer>
+    </div>
+
+    <!-- アップロードモーダル -->
+    <div class="modal" id="uploadModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">
+                    <i data-feather="upload" style="width: 24px; height: 24px;"></i>
+                    大学データの追加
+                </h2>
+                <button class="modal-close" onclick="hideUploadModal()">
+                    <i data-feather="x" style="width: 24px; height: 24px;"></i>
+                </button>
+            </div>
+            
+            <div class="modal-body">
+                <div id="uploadAlert"></div>
+
+                <div style="margin-bottom: 1.5rem;">
+                    <label class="form-label">
+                        <i data-feather="file-text" style="width: 16px; height: 16px; display: inline;"></i>
+                        JSONファイルを選択
+                    </label>
+                    <div class="upload-zone" onclick="document.getElementById('fileInput').click()">
+                        <i data-feather="upload" style="width: 32px; height: 32px; color: #9ca3af; margin-bottom: 0.5rem;"></i>
+                        <div>
+                            <button type="button" class="btn btn-blue" style="margin-bottom: 0.25rem;">
+                                ファイルを選択
+                            </button>
+                            <p style="font-size: 0.75rem; color: #6b7280;">
+                                JSONファイルをアップロード
+                            </p>
+                        </div>
+                    </div>
+                    <input type="file" id="fileInput" accept=".json" style="display: none;" onchange="handleFileUpload(event)">
+                </div>
+
+                <div class="format-example">
+                    <h3 style="font-weight: 600; color: #374151; margin-bottom: 0.5rem; font-size: 0.875rem;">JSONファイルの形式</h3>
+                    <div style="font-size: 0.75rem; color: #6b7280;">
+                        <p>以下の形式でJSONファイルを作成してください：</p>
+                        <div class="format-code">
+                            <pre style="font-size: 0.75rem; white-space: pre-wrap;">{
+  "university_key": {
+    "name": "大学名",
+    "color": "red",
+    "established": 2000,
+    "location": "所在地",
+    "data": [
+      {
+        "faculty": "学部名",
+        "examTypes": [
+          {
+            "name": "入試方式名",
+            "commonTest": "共通テスト",
+            "individualTest": "個別試験",
+            "totalPoints": "総点数",
+            "notes": "備考",
+            "difficulty": "A",
+            "competitionRate": "3.0倍"
+          }
+        ]
+      }
+    ]
+  }
+}</pre>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 0.75rem; border-top: 1px solid #e5e7eb; margin-top: 1rem;">
+                    <button onclick="generateSampleJSON()" style="color: #2563eb; background: none; border: none; cursor: pointer; font-size: 0.75rem; display: flex; align-items: center; gap: 0.25rem;">
+                        <i data-feather="download" style="width: 12px; height: 12px;"></i>
+                        サンプルJSON
+                    </button>
+                    
+                    <button class="btn btn-gray" onclick="hideUploadModal()">
+                        閉じる
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 削除モーダル -->
+    <div class="modal" id="deleteModal">
+        <div class="modal-content" style="max-width: 400px;">
+            <div class="modal-header">
+                <h2 class="modal-title" style="color: #dc2626;">
+                    <i data-feather="x" style="width: 24px; height: 24px;"></i>
+                    大学データの削除
+                </h2>
+                <button class="modal-close" onclick="hideDeleteModal()">
+                    <i data-feather="x" style="width: 24px; height: 24px;"></i>
+                </button>
+            </div>
+            
+            <div class="modal-body">
+                <div id="deleteAlert"></div>
+
+                <div style="font-size: 0.875rem; color: #6b7280; margin-bottom: 1rem;">
+                    削除したい大学を選択してください。削除されたデータは復元できません。
+                </div>
+
+                <div class="university-list" id="universityList">
+                    <!-- 動的に生成 -->
+                </div>
+
+                <div style="display: flex; justify-content: end; padding-top: 1rem; border-top: 1px solid #e5e7eb;">
+                    <button class="btn btn-gray" onclick="hideDeleteModal()">
+                        閉じる
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // グローバル変数
+        let universities = {
+            waseda: {
+                name: '早稲田大学',
+                color: 'red',
+                established: 1882,
+                location: '東京都新宿区',
+                data: [
+                    {
+                        faculty: '政治経済',
+                        examTypes: [
+                            {
+                                name: '共テ利用',
+                                commonTest: '5教科6科目（800点満点）',
+                                individualTest: '個別…課さない',
+                                totalPoints: '800点',
+                                notes: '共テ…地公→1まで。理→1まで',
+                                difficulty: 'S',
+                                competitionRate: '3.2倍',
+                                details: {
+                                    commonTestSubjects: ['国語(200)', '数学(200)', '英語(200)', '理科・社会(200)'],
+                                    individualSubjects: []
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        faculty: '法',
+                        examTypes: [
+                            {
+                                name: '一般選抜',
+                                commonTest: '-',
+                                individualTest: '3教科（150点満点）',
+                                totalPoints: '150点',
+                                notes: '外国語重視',
+                                difficulty: 'S',
+                                competitionRate: '3.8倍',
+                                details: {
+                                    commonTestSubjects: [],
+                                    individualSubjects: ['国語(50)', '外国語(60)', '選択科目(40)']
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        faculty: '商',
+                        examTypes: [
+                            {
+                                name: '一般選抜',
+                                commonTest: '-',
+                                individualTest: '3教科（200点満点）',
+                                totalPoints: '200点',
+                                notes: '地歴・公民・数学・理科から1',
+                                difficulty: 'S',
+                                competitionRate: '4.1倍',
+                                details: {
+                                    commonTestSubjects: [],
+                                    individualSubjects: ['国語(80)', '外国語(80)', '選択科目(40)']
+                                }
+                            }
+                        ]
+                    }
+                ]
+            },
+            keio: {
+                name: '慶應義塾大学',
+                color: 'blue',
+                established: 1858,
+                location: '東京都港区',
+                data: [
+                    {
+                        faculty: '文',
+                        examTypes: [
+                            {
+                                name: '一般',
+                                commonTest: '-',
+                                individualTest: '2教科（350点満点）',
+                                totalPoints: '350点',
+                                notes: '小論文重視',
+                                difficulty: 'S',
+                                competitionRate: '3.1倍',
+                                details: {
+                                    commonTestSubjects: [],
+                                    individualSubjects: ['地歴(100)', '外国語(150)', '小論文(100)']
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        faculty: '経済',
+                        examTypes: [
+                            {
+                                name: 'A方式',
+                                commonTest: '-',
+                                individualTest: '2教科（420点満点）',
+                                totalPoints: '420点',
+                                notes: '数学重視',
+                                difficulty: 'S',
+                                competitionRate: '4.8倍',
+                                details: {
+                                    commonTestSubjects: [],
+                                    individualSubjects: ['数学(150)', '外国語(200)', '小論文(70)']
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        faculty: '商',
+                        examTypes: [
+                            {
+                                name: 'A方式',
+                                commonTest: '-',
+                                individualTest: '3教科（400点満点）',
+                                totalPoints: '400点',
+                                notes: '地歴・数学から1',
+                                difficulty: 'S',
+                                competitionRate: '5.2倍',
+                                details: {
+                                    commonTestSubjects: [],
+                                    individualSubjects: ['地歴・数学(100)', '外国語(200)', '論文テスト(100)']
+                                }
+                            }
+                        ]
+                    }
+                ]
+            },
+            tokyo: {
+                name: '東京大学',
+                color: 'indigo',
+                established: 1877,
+                location: '東京都文京区',
+                data: [
+                    {
+                        faculty: '文科一類',
+                        examTypes: [
+                            {
+                                name: '前期日程',
+                                commonTest: '5教科7科目（900点満点）',
+                                individualTest: '4教科（440点満点）',
+                                totalPoints: '1340点',
+                                notes: '共テ…地公→2まで。理→2まで',
+                                difficulty: 'S',
+                                competitionRate: '2.8倍',
+                                details: {
+                                    commonTestSubjects: ['国語(200)', '数学(200)', '英語(200)', '理科(200)', '社会(100)'],
+                                    individualSubjects: ['国語(120)', '数学(120)', '英語(120)', '社会(80)']
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        faculty: '理科一類',
+                        examTypes: [
+                            {
+                                name: '前期日程',
+                                commonTest: '5教科7科目（900点満点）',
+                                individualTest: '4教科（440点満点）',
+                                totalPoints: '1340点',
+                                notes: '共テ…理→2まで。数学重視',
+                                difficulty: 'S',
+                                competitionRate: '3.1倍',
+                                details: {
+                                    commonTestSubjects: ['国語(200)', '数学(200)', '英語(200)', '理科(200)', '社会(100)'],
+                                    individualSubjects: ['数学(120)', '理科(120)', '英語(120)', '国語(80)']
+                                }
+                            }
+                        ]
+                    }
+                ]
+            }
+        };
+
+        let selectedUniversity = 'waseda';
+        let expandedCards = new Set();
+        let favorites = new Set();
+        let showStatsPanel = false;
+
+        // 初期化
+        document.addEventListener('DOMContentLoaded', function() {
+            try {
+                document.getElementById('updateDate').textContent = new Date().toLocaleDateString('ja-JP');
+                updateUniversityButtons();
+                updateDisplay();
+                setupEventListeners();
+            } catch (error) {
+                console.error('初期化エラー:', error);
+                // エラーが発生しても基本機能は動作するように
+                updateUniversityButtons();
+                updateDisplay();
+                setupEventListeners();
+            }
+        });
+
+        function setupEventListeners() {
+            try {
+                document.getElementById('searchTerm').addEventListener('input', updateDisplay);
+                document.getElementById('facultyFilter').addEventListener('change', updateDisplay);
+                document.getElementById('examTypeFilter').addEventListener('change', updateDisplay);
+            } catch (error) {
+                console.error('イベントリスナー設定エラー:', error);
+            }
+        }
+
+        function updateUniversityButtons() {
+            try {
+                const container = document.getElementById('universityButtons');
+                if (!container) return;
+                
+                container.innerHTML = '';
+                
+                Object.entries(universities).forEach(([key, uni]) => {
+                    const button = document.createElement('button');
+                    button.className = `university-btn ${selectedUniversity === key ? 'active' : 'inactive'}`;
+                    button.onclick = () => changeUniversity(key);
+                    button.innerHTML = `
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"></path>
+                            <path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"></path>
+                            <path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"></path>
+                            <path d="M10 6h4"></path>
+                            <path d="M10 10h4"></path>
+                            <path d="M10 14h4"></path>
+                            <path d="M10 18h4"></path>
+                        </svg>
+                        ${uni.name}
+                    `;
+                    container.appendChild(button);
+                });
+                
+                const countElement = document.getElementById('universityCount');
+                if (countElement) {
+                    countElement.textContent = Object.keys(universities).length;
+                }
+            } catch (error) {
+                console.error('大学ボタン更新エラー:', error);
+            }
+        }
+
+        function changeUniversity(universityKey) {
+            selectedUniversity = universityKey;
+            expandedCards.clear();
+            resetFilters();
+            updateDisplay();
+        }
+
+        function updateDisplay() {
+            try {
+                const currentUniversity = universities[selectedUniversity];
+                if (!currentUniversity) return;
+
+                // ヘッダー更新
+                const nameElement = document.getElementById('universityName');
+                const establishedElement = document.getElementById('established');
+                const locationElement = document.getElementById('location');
+                const headerElement = document.getElementById('header');
+                
+                if (nameElement) nameElement.textContent = currentUniversity.name;
+                if (establishedElement) establishedElement.textContent = currentUniversity.established;
+                if (locationElement) locationElement.textContent = currentUniversity.location;
+                if (headerElement) headerElement.className = `header ${currentUniversity.color}`;
+
+                // 大学ボタン更新
+                updateUniversityButtons();
+
+                // フィルター更新
+                updateFilters();
+
+                // 統計更新
+                updateStats();
+
+                // 結果表示更新
+                updateResults();
+
+                // お気に入り数更新
+                const favoriteCountElement = document.getElementById('favoriteCount');
+                if (favoriteCountElement) {
+                    favoriteCountElement.textContent = favorites.size;
+                }
+            } catch (error) {
+                console.error('表示更新エラー:', error);
+            }
+        }
+
+        function updateFilters() {
+            const currentData = universities[selectedUniversity].data;
+            
+            // 学部フィルター
+            const facultySelect = document.getElementById('facultyFilter');
+            const currentFaculty = facultySelect.value;
+            facultySelect.innerHTML = '<option value="">すべての学部</option>';
+            
+            const faculties = [...new Set(currentData.map(item => item.faculty))];
+            faculties.forEach(faculty => {
+                const option = document.createElement('option');
+                option.value = faculty;
+                option.textContent = faculty;
+                facultySelect.appendChild(option);
+            });
+            facultySelect.value = currentFaculty;
+
+            // 入試方式フィルター
+            const examTypeSelect = document.getElementById('examTypeFilter');
+            const currentExamType = examTypeSelect.value;
+            examTypeSelect.innerHTML = '<option value="">すべての方式</option>';
+            
+            const examTypes = [...new Set(currentData.flatMap(item => item.examTypes.map(type => type.name)))];
+            examTypes.forEach(type => {
+                const option = document.createElement('option');
+                option.value = type;
+                option.textContent = type;
+                examTypeSelect.appendChild(option);
+            });
+            examTypeSelect.value = currentExamType;
+        }
+
+        function getFilteredData() {
+            const currentData = universities[selectedUniversity].data;
+            const searchTerm = document.getElementById('searchTerm').value.toLowerCase();
+            const selectedFaculty = document.getElementById('facultyFilter').value;
+            const selectedExamType = document.getElementById('examTypeFilter').value;
+
+            return currentData.filter(item => {
+                const matchesSearch = 
+                    item.faculty.toLowerCase().includes(searchTerm) ||
+                    item.examTypes.some(type => 
+                        type.name.toLowerCase().includes(searchTerm) ||
+                        type.notes.toLowerCase().includes(searchTerm)
+                    );
+                
+                const matchesFaculty = selectedFaculty === '' || item.faculty === selectedFaculty;
+                const matchesExamType = selectedExamType === '' || 
+                    item.examTypes.some(type => type.name === selectedExamType);
+                
+                return matchesSearch && matchesFaculty && matchesExamType;
+            });
+        }
+
+        function updateStats() {
+            const currentData = universities[selectedUniversity].data;
+            const allExamTypes = currentData.flatMap(item => item.examTypes);
+            
+            const totalFaculties = currentData.length;
+            const totalExamTypes = allExamTypes.length;
+            const avgCompetition = totalExamTypes > 0 ? 
+                (allExamTypes.reduce((sum, type) => 
+                    sum + parseFloat(type.competitionRate?.replace('倍', '') || 0), 0) / totalExamTypes).toFixed(1) : '0';
+            
+            const difficultyCount = allExamTypes.reduce((acc, type) => {
+                acc[type.difficulty] = (acc[type.difficulty] || 0) + 1;
+                return acc;
+            }, {});
+
+            document.getElementById('totalFaculties').textContent = totalFaculties;
+            document.getElementById('totalExamTypes').textContent = totalExamTypes;
+            document.getElementById('avgCompetition').textContent = avgCompetition;
+
+            // 難易度分布
+            const difficultyDiv = document.getElementById('difficultyDistribution');
+            difficultyDiv.innerHTML = '';
+            
+            Object.entries(difficultyCount).forEach(([level, count]) => {
+                const span = document.createElement('span');
+                span.className = `badge ${getDifficultyColor(level).split(' ')[0].replace('bg-', '').replace('-100', '')}`;
+                span.textContent = `${level}: ${count}`;
+                span.style.marginRight = '0.25rem';
+                difficultyDiv.appendChild(span);
+            });
+        }
+
+        function updateResults() {
+            const filteredData = getFilteredData();
+            const resultsContainer = document.getElementById('results');
+            const noResultsDiv = document.getElementById('noResults');
+            
+            document.getElementById('resultCount').textContent = filteredData.length;
+
+            if (filteredData.length === 0) {
+                resultsContainer.classList.add('hidden');
+                noResultsDiv.classList.remove('hidden');
+                return;
+            }
+
+            resultsContainer.classList.remove('hidden');
+            noResultsDiv.classList.add('hidden');
+
+            const currentUniversity = universities[selectedUniversity];
+            resultsContainer.innerHTML = '';
+
+            filteredData.forEach((item, index) => {
+                const facultyCard = document.createElement('div');
+                facultyCard.className = 'faculty-card';
+                facultyCard.innerHTML = `
+                    <div class="faculty-header ${currentUniversity.color}" onclick="toggleCard(${index})">
+                        <div class="faculty-header-content">
+                            <div>
+                                <h2 class="faculty-title">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                                        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                                    </svg>
+                                    ${item.faculty}学部
+                                </h2>
+                                <p class="faculty-subtitle">${item.examTypes.length}つの入試方式</p>
+                            </div>
+                            <div>
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    ${expandedCards.has(index) ? 
+                                        '<polyline points="18,15 12,9 6,15"></polyline>' : 
+                                        '<polyline points="6,9 12,15 18,9"></polyline>'
+                                    }
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="faculty-content ${expandedCards.has(index) ? 'show' : ''}" id="content-${index}">
+                        <div class="exam-types">
+                            ${item.examTypes.map((examType, typeIndex) => createExamCard(examType, index, typeIndex, currentUniversity.color)).join('')}
+                        </div>
+                    </div>
+                `;
+                    resultsContainer.appendChild(facultyCard);
+            });
+        }
+
+        function createExamCard(examType, facultyIndex, typeIndex, color) {
+            const favoriteKey = `${selectedUniversity}-${facultyIndex}-${typeIndex}`;
+            const isFavorite = favorites.has(favoriteKey);
+            
+            return `
+                <div class="exam-card">
+                    <button class="favorite-btn ${isFavorite ? 'active' : ''}" onclick="toggleFavorite('${favoriteKey}')">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="${isFavorite ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"></polygon>
+                        </svg>
+                    </button>
+
+                    <div class="exam-header">
+                        <div>
+                            <h3 class="exam-title">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                    <line x1="16" y1="2" x2="16" y2="6"></line>
+                                    <line x1="8" y1="2" x2="8" y2="6"></line>
+                                    <line x1="3" y1="10" x2="21" y2="10"></line>
+                                </svg>
+                                ${examType.name}
+                            </h3>
+                            <div class="exam-badges">
+                                <span class="badge ${getDifficultyColor(examType.difficulty).split(' ')[0].replace('bg-', '').replace('-100', '')}">
+                                    難易度: ${examType.difficulty}
+                                </span>
+                                <span class="badge blue">
+                                    競争率: ${examType.competitionRate}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="exam-points ${getAccentColor(color)}">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: inline; vertical-align: middle; margin-right: 4px;">
+                                <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                                <line x1="8" y1="21" x2="16" y2="21"></line>
+                                <line x1="12" y1="17" x2="12" y2="21"></line>
+                            </svg>
+                            ${examType.totalPoints}
+                        </div>
+                    </div>
+
+                    <div class="exam-details">
+                        <div class="detail-section">
+                            <h4 class="detail-title">
+                                <div class="detail-indicator blue"></div>
+                                共通テスト
+                            </h4>
+                            <div class="detail-content blue">
+                                <p>${examType.commonTest || '実施なし'}</p>
+                                ${examType.details?.commonTestSubjects?.length ? `
+                                    <div class="subject-tags">
+                                        ${examType.details.commonTestSubjects.map(subject => 
+                                            `<span class="subject-tag blue">${subject}</span>`
+                                        ).join('')}
+                                    </div>
+                                ` : ''}
+                            </div>
+                        </div>
+
+                        <div class="detail-section">
+                            <h4 class="detail-title">
+                                <div class="detail-indicator green"></div>
+                                個別学力検査
+                            </h4>
+                            <div class="detail-content green">
+                                <p>${examType.individualTest || '実施なし'}</p>
+                                ${examType.details?.individualSubjects?.length ? `
+                                    <div class="subject-tags">
+                                        ${examType.details.individualSubjects.map(subject => 
+                                            `<span class="subject-tag green">${subject}</span>`
+                                        ).join('')}
+                                    </div>
+                                ` : ''}
+                            </div>
+                        </div>
+                    </div>
+
+                    ${examType.notes && examType.notes !== '-' ? `
+                        <div class="detail-section">
+                            <h4 class="detail-title">
+                                <div class="detail-indicator orange"></div>
+                                備考
+                            </h4>
+                            <div class="detail-content orange">
+                                <p>${examType.notes}</p>
+                            </div>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+        }
+
+        function getDifficultyColor(difficulty) {
+            switch(difficulty) {
+                case 'S': return 'bg-red-100 text-red-800';
+                case 'A': return 'bg-orange-100 text-orange-800';
+                case 'B': return 'bg-yellow-100 text-yellow-800';
+                case 'C': return 'bg-green-100 text-green-800';
+                default: return 'bg-gray-100 text-gray-800';
+            }
+        }
+
+        function getAccentColor(color) {
+            switch(color) {
+                case 'red': return 'color: #dc2626;';
+                case 'blue': return 'color: #2563eb;';
+                case 'indigo': return 'color: #4f46e5;';
+                case 'green': return 'color: #059669;';
+                case 'purple': return 'color: #7c3aed;';
+                default: return 'color: #6b7280;';
+            }
+        }
+
+        function toggleCard(index) {
+            if (expandedCards.has(index)) {
+                expandedCards.delete(index);
+            } else {
+                expandedCards.add(index);
+            }
+            
+            const content = document.getElementById(`content-${index}`);
+            const isExpanded = expandedCards.has(index);
+            if (content) {
+                content.classList.toggle('show', isExpanded);
+            }
+            
+            // アイコンも更新 - SVGを直接更新
+            const headerElement = content?.previousElementSibling;
+            const iconElement = headerElement?.querySelector('svg:last-child');
+            if (iconElement) {
+                iconElement.innerHTML = isExpanded ? 
+                    '<polyline points="18,15 12,9 6,15"></polyline>' : 
+                    '<polyline points="6,9 12,15 18,9"></polyline>';
+            }
+        }
+
+        function toggleFavorite(key) {
+            if (favorites.has(key)) {
+                favorites.delete(key);
+            } else {
+                favorites.add(key);
+            }
+            updateDisplay();
+        }
+
+        function toggleStats() {
+            try {
+                showStatsPanel = !showStatsPanel;
+                const content = document.getElementById('statsContent');
+                const chevron = document.getElementById('statsChevron');
+                
+                if (content) {
+                    content.classList.toggle('show', showStatsPanel);
+                }
+                
+                if (chevron) {
+                    if (showStatsPanel) {
+                        chevron.innerHTML = '<polyline points="18,15 12,9 6,15"></polyline>';
+                    } else {
+                        chevron.innerHTML = '<polyline points="6,9 12,15 18,9"></polyline>';
+                    }
+                }
+            } catch (error) {
+                console.error('統計パネル切り替えエラー:', error);
+            }
+        }
+
+        function resetFilters() {
+            document.getElementById('searchTerm').value = '';
+            document.getElementById('facultyFilter').value = '';
+            document.getElementById('examTypeFilter').value = '';
+            updateDisplay();
+        }
+
+        async function shareData() {
+            const currentUniversity = universities[selectedUniversity];
+            const filteredData = getFilteredData();
+            const stats = calculateStats();
+            
+            const shareText = `${currentUniversity.name}の入試情報をチェック中！\n検索結果: ${filteredData.length}件の学部\n平均競争率: ${stats.avgCompetition}倍\n#大学受験 #入試情報`;
+            
+            if (navigator.share) {
+                try {
+                    await navigator.share({
+                        title: `${currentUniversity.name} 入試情報`,
+                        text: shareText,
+                        url: window.location.href
+                    });
+                } catch (err) {
+                    console.log('共有がキャンセルされました');
+                }
+            } else {
+                try {
+                    await navigator.clipboard.writeText(shareText);
+                    alert('テキストをクリップボードにコピーしました！');
+                } catch (err) {
+                    alert('共有テキスト:\n' + shareText);
+                }
+            }
+        }
+
+        function calculateStats() {
+            const currentData = universities[selectedUniversity].data;
+            const allExamTypes = currentData.flatMap(item => item.examTypes);
+            const avgCompetition = allExamTypes.length > 0 ? 
+                (allExamTypes.reduce((sum, type) => 
+                    sum + parseFloat(type.competitionRate?.replace('倍', '') || 0), 0) / allExamTypes.length).toFixed(1) : '0';
+            
+            return { avgCompetition };
+        }
+
+        // モーダル関連
+        function showUploadModal() {
+            document.getElementById('uploadModal').classList.add('show');
+        }
+
+        function hideUploadModal() {
+            document.getElementById('uploadModal').classList.remove('show');
+            document.getElementById('uploadAlert').innerHTML = '';
+        }
+
+        function showDeleteModal() {
+            updateUniversityDeleteList();
+            document.getElementById('deleteModal').classList.add('show');
+        }
+
+        function hideDeleteModal() {
+            document.getElementById('deleteModal').classList.remove('show');
+            document.getElementById('deleteAlert').innerHTML = '';
+        }
+
+        function updateUniversityDeleteList() {
+            const container = document.getElementById('universityList');
+            container.innerHTML = '';
+
+            Object.entries(universities).forEach(([key, university]) => {
+                const item = document.createElement('div');
+                item.className = 'university-item';
+                item.innerHTML = `
+                    <div class="university-info">
+                        <i data-feather="building-2" style="width: 20px; height: 20px; color: #9ca3af;"></i>
+                        <div>
+                            <div style="font-weight: 500; color: #374151;">${university.name}</div>
+                            <div class="university-meta">
+                                ${university.data.length}学部 • ${university.data.reduce((total, faculty) => total + faculty.examTypes.length, 0)}入試方式
+                            </div>
+                        </div>
+                    </div>
+                    <button class="btn btn-red" ${Object.keys(universities).length <= 1 ? 'disabled' : ''} onclick="deleteUniversity('${key}')">
+                        削除
+                    </button>
+                `;
+                container.appendChild(item);
+            });
+
+            feather.replace();
+        }
+
+        function deleteUniversity(key) {
+            if (Object.keys(universities).length <= 1) {
+                showAlert('deleteAlert', 'error', '最後の大学データは削除できません。');
+                return;
+            }
+
+            const universityName = universities[key].name;
+            delete universities[key];
+
+            // 削除した大学が現在選択されている場合、別の大学を選択
+            if (selectedUniversity === key) {
+                selectedUniversity = Object.keys(universities)[0];
+            }
+
+            // お気に入りから削除された大学のデータを除去
+            const newFavorites = new Set();
+            favorites.forEach(fav => {
+                if (!fav.startsWith(key + '-')) {
+                    newFavorites.add(fav);
+                }
+            });
+            favorites = newFavorites;
+
+            showAlert('deleteAlert', 'success', `${universityName}のデータを削除しました。`);
+            updateUniversityDeleteList();
+            updateDisplay();
+        }
+
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            if (file.type !== 'application/json') {
+                showAlert('uploadAlert', 'error', 'JSONファイルを選択してください');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const jsonData = JSON.parse(e.target.result);
+                    const validationErrors = validateUniversityData(jsonData);
+                    
+                    if (validationErrors.length > 0) {
+                        showAlert('uploadAlert', 'error', `データ検証エラー:\n${validationErrors.join('\n')}`);
+                        return;
+                    }
+
+                    // デフォルト値を設定
+                    const processedData = {};
+                    for (const [key, university] of Object.entries(jsonData)) {
+                        processedData[key] = {
+                            name: university.name,
+                            color: university.color || 'gray',
+                            established: university.established || new Date().getFullYear(),
+                            location: university.location || '所在地未設定',
+                            data: university.data.map(faculty => ({
+                                ...faculty,
+                                examTypes: faculty.examTypes.map(examType => ({
+                                    ...examType,
+                                    difficulty: examType.difficulty || 'B',
+                                    competitionRate: examType.competitionRate || '未設定',
+                                    commonTest: examType.commonTest || '-',
+                                    individualTest: examType.individualTest || '-',
+                                    notes: examType.notes || '-',
+                                    details: {
+                                        commonTestSubjects: examType.details?.commonTestSubjects || [],
+                                        individualSubjects: examType.details?.individualSubjects || [],
+                                        specializations: examType.details?.specializations || []
+                                    }
+                                }))
+                            }))
+                        };
+                    }
+
+                    // 既存データに追加（重複は上書き）
+                    universities = { ...universities, ...processedData };
+                    
+                    // 新しく追加された大学があれば、それを選択
+                    const newUniversityKeys = Object.keys(processedData);
+                    if (newUniversityKeys.length > 0) {
+                        selectedUniversity = newUniversityKeys[0];
+                    }
+                    
+                    showAlert('uploadAlert', 'success', `${Object.keys(processedData).length}校の大学データを正常に読み込みました`);
+                    
+                    resetFilters();
+                    expandedCards.clear();
+                    updateDisplay();
+                    
+                } catch (error) {
+                    showAlert('uploadAlert', 'error', `JSONファイルの解析に失敗しました: ${error.message}`);
+                }
+            };
+            
+            reader.readAsText(file);
+        }
+
+        function validateUniversityData(data) {
+            const errors = [];
+            
+            if (!data || typeof data !== 'object') {
+                errors.push('データが正しいオブジェクト形式ではありません');
+                return errors;
+            }
+
+            for (const [key, university] of Object.entries(data)) {
+                if (!university.name) {
+                    errors.push(`大学 ${key}: 名前が設定されていません`);
+                }
+                
+                if (!university.data || !Array.isArray(university.data)) {
+                    errors.push(`大学 ${key}: 学部データが配列ではありません`);
+                    continue;
+                }
+
+                university.data.forEach((faculty, facultyIndex) => {
+                    if (!faculty.faculty) {
+                        errors.push(`大学 ${key}, 学部 ${facultyIndex}: 学部名が設定されていません`);
+                    }
+                    
+                    if (!faculty.examTypes || !Array.isArray(faculty.examTypes)) {
+                        errors.push(`大学 ${key}, 学部 ${faculty.faculty}: 入試方式が配列ではありません`);
+                        return;
+                    }
+
+                    faculty.examTypes.forEach((examType, examIndex) => {
+                        if (!examType.name) {
+                            errors.push(`大学 ${key}, 学部 ${faculty.faculty}, 入試 ${examIndex}: 入試名が設定されていません`);
+                        }
+                        if (!examType.totalPoints) {
+                            errors.push(`大学 ${key}, 学部 ${faculty.faculty}, 入試 ${examType.name}: 総点が設定されていません`);
+                        }
+                    });
+                });
+            }
+
+            return errors;
+        }
+
+        function generateSampleJSON() {
+            const sampleData = {
+                "sample_university": {
+                    "name": "サンプル大学",
+                    "color": "green",
+                    "established": 2000,
+                    "location": "東京都新宿区",
+                    "data": [
+                        {
+                            "faculty": "サンプル学部",
+                            "examTypes": [
+                                {
+                                    "name": "一般選抜",
+                                    "commonTest": "3教科3科目（300点満点）",
+                                    "individualTest": "英語・数学・国語（300点）",
+                                    "totalPoints": "600点",
+                                    "notes": "特記事項なし",
+                                    "difficulty": "A",
+                                    "competitionRate": "2.5倍",
+                                    "details": {
+                                        "commonTestSubjects": ["国語(100)", "数学(100)", "英語(100)"],
+                                        "individualSubjects": ["英語(100)", "数学(100)", "国語(100)"],
+                                        "specializations": ["一般コース", "特別コース"]
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                }
+            };
+            
+            const dataStr = JSON.stringify(sampleData, null, 2);
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'university_sample.json';
+            link.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function showAlert(containerId, type, message) {
+            const container = document.getElementById(containerId);
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert ${type}`;
+            
+            const icon = type === 'success' ? 'check-circle' : 'alert-circle';
+            alertDiv.innerHTML = `
+                <i data-feather="${icon}" style="width: 20px; height: 20px; flex-shrink: 0;"></i>
+                <div style="white-space: pre-line; font-size: 0.875rem;">${message}</div>
+            `;
+            
+            container.innerHTML = '';
+            container.appendChild(alertDiv);
+            feather.replace();
+        }
+
+        // クリック外でモーダルを閉じる
+        document.addEventListener('click', function(event) {
+            const uploadModal = document.getElementById('uploadModal');
+            const deleteModal = document.getElementById('deleteModal');
+            
+            if (event.target === uploadModal) {
+                hideUploadModal();
+            }
+            if (event.target === deleteModal) {
+                hideDeleteModal();
+            }
+        });
+    </script>
+</body>
+</html>
